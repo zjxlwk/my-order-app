@@ -25,7 +25,7 @@ function ReceiverDashboard({ user, onLogout }) {
   // 获取待接单订单
   const fetchPendingOrders = async () => {
     try {
-      const response = await axios.get('/api/orders/pending', {
+      const response = await axios.get('/orders/pending', {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`
         }
@@ -39,7 +39,7 @@ function ReceiverDashboard({ user, onLogout }) {
   // 获取接单员的所有订单
   const fetchReceiverOrders = async () => {
     try {
-      const response = await axios.get('/api/orders/receiver', {
+      const response = await axios.get('/orders/receiver', {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`
         }
@@ -60,7 +60,7 @@ function ReceiverDashboard({ user, onLogout }) {
   const handleAcceptOrder = async (orderId) => {
     try {
       console.log('正在接受订单，订单ID:', orderId);
-      await axios.put(`/api/orders/accept/${orderId}`, {}, {
+      await axios.put(`/orders/accept/${orderId}`, {}, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`
         }
@@ -80,7 +80,7 @@ function ReceiverDashboard({ user, onLogout }) {
   // 完成订单
   const handleCompleteOrder = async (orderId) => {
     try {
-      await axios.put(`/api/orders/complete/${orderId}`, {}, {
+      await axios.put(`/orders/complete/${orderId}`, {}, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`
         }
@@ -105,7 +105,7 @@ function ReceiverDashboard({ user, onLogout }) {
       setSearchLoading(true)
       setSearchError('')
       
-      const response = await axios.get('/api/orders/search', {
+      const response = await axios.get('/orders/search', {
         params: { info: queryInfo.trim() },
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`
@@ -133,7 +133,7 @@ function ReceiverDashboard({ user, onLogout }) {
   const fetchStats = async () => {
     try {
       setStatsLoading(true)
-      const response = await axios.get('/api/orders/stats/receiver', {
+      const response = await axios.get('/orders/stats/receiver', {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`
         }

@@ -2,7 +2,8 @@ import { useState } from 'react'
 import axios from 'axios'
 
 // 配置axios基础URL
-axios.defaults.baseURL = import.meta.env.VITE_API_URL || '/api'
+// 适配Netlify Functions的API路径
+axios.defaults.baseURL = import.meta.env.VITE_API_URL || '/.netlify/functions/api'
 import { Link, useNavigate } from 'react-router-dom'
 
 function Login({ onLogin }) {
@@ -16,7 +17,7 @@ function Login({ onLogin }) {
     setError('')
     
     try {
-      const response = await axios.post('/api/users/login', {
+      const response = await axios.post('/users/login', {
         username,
         password
       })

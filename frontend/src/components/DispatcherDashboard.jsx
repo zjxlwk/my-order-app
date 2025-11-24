@@ -26,7 +26,7 @@ function DispatcherDashboard({ user, onLogout }) {
   // 获取已派订单
   const fetchOrders = async () => {
     try {
-      const response = await axios.get('/api/orders/dispatcher', {
+      const response = await axios.get('/orders/dispatcher', {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`
         }
@@ -49,7 +49,7 @@ function DispatcherDashboard({ user, onLogout }) {
     }
 
     try {
-      await axios.post('/api/orders/create', {
+      await axios.post('/orders/create', {
         content: orderContent
       }, {
         headers: {
@@ -80,7 +80,7 @@ function DispatcherDashboard({ user, onLogout }) {
   const fetchStats = async () => {
     try {
       setStatsLoading(true)
-      const response = await axios.get('/api/orders/stats/dispatcher', {
+      const response = await axios.get('/orders/stats/dispatcher', {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`
         }
@@ -325,7 +325,7 @@ function DispatcherDashboard({ user, onLogout }) {
     setSearchLoading(true)
     
     try {
-      const response = await axios.get(`/api/orders/search/receiver?username=${encodeURIComponent(searchUsername)}`, {
+      const response = await axios.get(`/orders/search/receiver?username=${encodeURIComponent(searchUsername)}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`
         }

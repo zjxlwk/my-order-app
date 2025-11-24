@@ -1,5 +1,0 @@
-# API代理重定向
-/api/*  ${API_URL}/:splat  200  
-
-# SPA路由重定向
-/*  /index.html  200
