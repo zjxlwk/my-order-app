@@ -1,0 +1,16 @@
+{
+  "name": "delivery-system",
+  "version": "1.0.0",
+  "description": "Delivery system for dispatcher and receiver",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["delivery", "system"],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "mysql2": "^3.9.0",
+    "jsonwebtoken": "^9.0.2"
+  }
+}
