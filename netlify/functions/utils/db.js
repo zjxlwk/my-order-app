@@ -13,11 +13,8 @@ const pool = mysql.createPool({
   queueLimit: 0
 });
 
-// 导出连接池
-module.exports = pool;
-
 // 初始化数据库表结构
-exports.initTables = async () => {
+const initTables = async () => {
   try {
     const connection = await pool.getConnection();
     
@@ -54,4 +51,10 @@ exports.initTables = async () => {
   } catch (error) {
     console.error('Error initializing database tables:', error);
   }
+};
+
+// 导出连接池和初始化函数
+module.exports = {
+  pool,
+  initTables
 };
