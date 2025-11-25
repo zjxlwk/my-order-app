@@ -2,6 +2,9 @@ import { useState } from 'react'
 import axios from 'axios'
 import { Link, useNavigate } from 'react-router-dom'
 
+// 配置axios基础URL，适配Netlify Functions的API路径
+axios.defaults.baseURL = import.meta.env.VITE_API_URL || '/.netlify/functions/api'
+
 function Register() {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
