@@ -1,16 +1,13 @@
 {
-  "name": "delivery-system",
+  "name": "delivery-system-miniprogram",
   "version": "1.0.0",
-  "description": "Delivery system for dispatcher and receiver",
-  "main": "index.js",
+  "description": "微信小程序配送系统 - 基于云开发",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "clean": "rimraf node_modules"
   },
-  "keywords": ["delivery", "system"],
+  "keywords": ["wechat", "miniprogram", "cloud-development", "delivery"],
   "author": "",
   "license": "ISC",
-  "dependencies": {
-    "mysql2": "^3.9.0",
-    "jsonwebtoken": "^9.0.2"
-  }
+  "dependencies": {}
 }
