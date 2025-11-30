@@ -73,6 +73,7 @@ exports.main = async (event, context) => {
             console.log('状态映射 - 前端status:', status, '实际status:', actualStatus);
           }
           
+          // 根据不同用户类型应用不同的过滤条件
           // 对于接单员：
           // 1. 查询待接单时不添加receiverId过滤条件，因为待接单订单还没有分配
           // 2. 查询配送中和已完成订单时，只显示自己接的订单
@@ -80,6 +81,7 @@ exports.main = async (event, context) => {
             whereCondition.receiverId = userId;
             console.log('应用receiverId过滤条件:', whereCondition.receiverId);
           }
+          // 对于派单员：不需要特殊过滤，可以查看所有订单
           
           // 根据状态筛选
           if (actualStatus && actualStatus !== 'all') {
@@ -87,22 +89,103 @@ exports.main = async (event, context) => {
             console.log('应用状态过滤条件:', whereCondition.status);
           }
           
-          // 如果有查询条件，应用到数据库查询
-          if (Object.keys(whereCondition).length > 0) {
+          // 构建查询条件
+            if (searchQuery && typeof searchQuery === 'string') {
+              // 派单员页面特殊处理：支持用户名和用户ID搜索
+              if (user.userType === 'dispatcher') {
+                try {
+                  // 首先构建基础搜索条件数组
+                  let orConditions = [
+                    { deliveryAddress: db.RegExp({ regexp: searchQuery, options: 'i' }) },
+                    { contactPerson: db.RegExp({ regexp: searchQuery, options: 'i' }) },
+                    { contactPhone: db.RegExp({ regexp: searchQuery, options: 'i' }) },
+                    // 直接添加用户ID搜索条件
+                    { dispatcherId: db.RegExp({ regexp: searchQuery, options: 'i' }) },
+                    { receiverId: db.RegExp({ regexp: searchQuery, options: 'i' }) }
+                  ];
+                  
+                  // 同时查询匹配的用户名
+                  const matchingUsers = await db.collection('users')
+                    .where({
+                      username: db.RegExp({ regexp: searchQuery, options: 'i' })
+                    })
+                    .field({ _id: true })
+                    .get();
+                  
+                  const userIds = matchingUsers.data.map(u => u._id);
+                  
+                  // 如果有匹配的用户，添加用户ID搜索条件
+                  if (userIds.length > 0) {
+                    orConditions.push(
+                      db.command.or([
+                        { dispatcherId: db.command.in(userIds) },
+                        { receiverId: db.command.in(userIds) }
+                      ])
+                    );
+                  }
+                  
+                  // 现在创建完整的OR条件
+                  const searchConditions = db.command.or(orConditions);
+                
+                // 如果有基础条件，使用AND组合
+                if (Object.keys(whereCondition).length > 0) {
+                  query = query.where(
+                    db.command.and([
+                      whereCondition,
+                      searchConditions
+                    ])
+                  );
+                } else {
+                  query = query.where(searchConditions);
+                }
+              } catch (userSearchError) {
+                console.error('用户搜索出错:', userSearchError);
+                // 出错时回退到原始搜索逻辑
+                const fallbackSearchConditions = db.command.or([
+                  { deliveryAddress: db.RegExp({ regexp: searchQuery, options: 'i' }) },
+                  { contactPerson: db.RegExp({ regexp: searchQuery, options: 'i' }) },
+                  { contactPhone: db.RegExp({ regexp: searchQuery, options: 'i' }) }
+                ]);
+                
+                if (Object.keys(whereCondition).length > 0) {
+                  query = query.where(
+                    db.command.and([
+                      whereCondition,
+                      fallbackSearchConditions
+                    ])
+                  );
+                } else {
+                  query = query.where(fallbackSearchConditions);
+                }
+              }
+            } else {
+              // 接单员页面保持原有搜索逻辑
+              const searchConditions = db.command.or([
+                { deliveryAddress: db.RegExp({ regexp: searchQuery, options: 'i' }) },
+                { contactPerson: db.RegExp({ regexp: searchQuery, options: 'i' }) },
+                { contactPhone: db.RegExp({ regexp: searchQuery, options: 'i' }) }
+              ]);
+              
+              // 如果有基础条件（如receiverId或status），使用AND组合
+              if (Object.keys(whereCondition).length > 0) {
+                query = query.where(
+                  db.command.and([
+                    whereCondition,
+                    searchConditions
+                  ])
+                );
+              } else {
+                // 只有搜索条件
+                query = query.where(searchConditions);
+              }
+            }
+          } else if (Object.keys(whereCondition).length > 0) {
+            // 只有基础条件，没有搜索条件
             query = query.where(whereCondition);
-            console.log('最终查询条件:', whereCondition);
-          } else {
-            console.log('无特殊查询条件，查询全部订单');
           }
+          // 没有条件时查询全部订单
           
-          // 如果有搜索查询，添加搜索条件
-          if (searchQuery && typeof searchQuery === 'string') {
-            query = query.where(_.or([
-              { deliveryAddress: db.RegExp({ regexp: searchQuery, options: 'i' }) },
-              { contactPerson: db.RegExp({ regexp: searchQuery, options: 'i' }) },
-              { contactPhone: db.RegExp({ regexp: searchQuery, options: 'i' }) }
-            ]));
-          }
+          // 查询条件已在前面的逻辑中应用
           
           // 查询订单总数和列表，处理集合不存在的情况
           try {
