@@ -1,6 +1,6 @@
 // 接单员仪表盘页面
 const app = getApp();
-const { getOrders, acceptOrder, completeOrder, getOrderStats } = require('../../utils/apiService.js');
+const { getOrderList, acceptOrder, completeOrder, getOrderStats } = require('../../utils/apiService.js');
 const storage = require('../../utils/storage.js');
 // 使用require导入format工具
 const { formatDateTime } = require('../../utils/format.js');
@@ -20,7 +20,12 @@ Page({
     loading: false,
     error: '',
     activeTab: 'pending', // 当前激活的标签页：pending, delivering, completed
-    refreshing: false
+    refreshing: false,
+    showModal: false,
+    modalTitle: '',
+    modalOrders: [],
+    // 当前登录用户信息
+    currentUser: ''
   },
 
   onShow() {
@@ -32,9 +37,22 @@ Page({
       return;
     }
     
+    // 获取并设置当前用户信息
+    this.setCurrentUserInfo();
+    
     // 加载统计数据和订单数据
     this.loadOrderStats();
     this.loadOrders();
+  },
+  
+  // 设置当前登录用户信息
+  setCurrentUserInfo() {
+    const userInfo = app.getUserInfo();
+    if (userInfo) {
+      this.setData({
+        currentUser: userInfo.username || '用户'
+      });
+    }
   },
 
   // 加载订单统计数据
@@ -86,7 +104,7 @@ Page({
                     this.data.activeTab === 'delivering' ? 'delivering' : 'completed';
       
       // 使用封装的API获取订单列表（调用云函数）
-      const result = await getOrders({
+      const result = await getOrderList({
         status,
         userType: 'receiver',
         query: this.data.searchQuery
@@ -146,49 +164,7 @@ Page({
     this.loadOrders();
   },
 
-  // 接单操作
-  async acceptOrder(e) {
-    console.log('接收到点击事件:', e);
-    console.log('dataset内容:', e.currentTarget.dataset);
-    
-    // 尝试从多个可能的键中获取订单ID
-    const dataset = e.currentTarget.dataset;
-    let orderId = dataset.orderId || dataset.orderid || dataset.id;
-    
-    console.log('从dataset提取的orderId:', orderId);
-    console.log('orderId类型:', typeof orderId);
-    
-    if (!orderId || orderId === 'undefined') {
-      console.error('无法从dataset中获取有效订单ID');
-      wx.showToast({
-        title: '系统错误，请刷新页面重试',
-        icon: 'none'
-      });
-      return;
-    }
-    
-    try {
-      // 使用封装的API接单（调用云函数）
-      console.log('准备调用acceptOrder API，订单ID:', orderId);
-      const result = await acceptOrder({ orderId });
-      
-      if (result.code === 200) {
-        wx.showToast({ title: '接单成功' });
-        // 切换到配送中标签页
-        this.setData({ activeTab: 'delivering' });
-        // 重新加载订单列表
-        this.loadOrders();
-      } else {
-        throw new Error(result.message || '接单失败');
-      }
-    } catch (err) {
-      console.error('接单操作失败:', err);
-      wx.showToast({ 
-        title: err.message || '接单失败',
-        icon: 'none'
-      });
-    }
-  },
+  // 接单操作功能已合并到handleAcceptOrder方法中
 
   // 完成订单操作
   async completeOrder(e) {
@@ -207,6 +183,8 @@ Page({
               wx.showToast({ title: '订单已完成' });
               // 重新加载配送中列表
               this.loadOrders();
+              // 重新加载统计数据，确保数据同步
+              this.loadOrderStats();
             } else {
               throw new Error(result.message || '操作失败');
             }
@@ -223,57 +201,139 @@ Page({
   },
 
   // 下拉刷新
-  onPullDownRefresh() {
+  async onPullDownRefresh() {
     this.setData({ refreshing: true });
-    this.loadOrders();
-  },
-
-  // 新的接单函数：通过view元素传递订单ID
-  async acceptOrderByOrderId(e) {
-    console.log('acceptOrderByOrderId接收到点击事件:', e);
-    console.log('dataset内容:', e.currentTarget.dataset);
-    
-    const { id } = e.currentTarget.dataset;
-    console.log('从dataset提取的订单ID:', id);
-    
-    if (!id || id === 'undefined') {
-      console.error('订单ID无效:', id);
-      wx.showToast({
-        title: '订单信息错误，请刷新页面',
-        icon: 'none'
-      });
-      return;
-    }
-    
+    // 同时刷新订单列表和统计数据
     try {
-      console.log('调用acceptOrder API，订单ID:', id);
-      const result = await acceptOrder({ orderId: id });
-      
-      if (result.code === 200) {
-        wx.showToast({ title: '接单成功' });
-        // 重新加载待接单列表
-        this.loadOrders();
-      } else {
-        throw new Error(result.message || '接单失败');
-      }
+      // 先加载统计数据，确保显示准确的待接单数
+      await this.loadOrderStats();
+      // 然后加载订单列表
+      await this.loadOrders();
     } catch (err) {
-      console.error('接单操作失败:', err);
-      wx.showToast({ 
-        title: err.message || '接单失败',
-        icon: 'none'
-      });
+      console.error('下拉刷新失败:', err);
+    } finally {
+      // 无论如何都要结束刷新状态
+      wx.stopPullDownRefresh();
+      this.setData({ refreshing: false });
     }
   },
   
-  // 新的接单处理函数
-  async handleAcceptOrder(e) {
-    // 在函数最开始添加更明显的日志，确保能看到函数被调用
-    console.log('========= handleAcceptOrder函数被调用 =========');
-    console.log('handleAcceptOrder接收到点击事件:', e);
+  // 手动刷新统计数据
+  async refreshStats(e) {
+    wx.showLoading({ title: '刷新中...' });
+    try {
+      // 刷新统计数据
+      await this.loadOrderStats();
+      
+      // 如果当前在待接单标签页，也刷新订单列表
+      if (this.data.activeTab === 'pending') {
+        await this.loadOrders();
+      }
+      
+      wx.showToast({ title: '刷新成功', icon: 'success' });
+      
+      // 如果点击的是待接单卡片且需要显示详情，延迟执行showOrderDetails
+      // 这样用户既能看到刷新效果，又能查看详情
+      if (e && e.currentTarget && e.currentTarget.dataset && e.currentTarget.dataset.status === 'pending') {
+        setTimeout(() => {
+          this.showOrderDetails(e);
+        }, 800);
+      }
+    } catch (err) {
+      console.error('刷新统计数据失败:', err);
+      wx.showToast({ 
+        title: err.message || '刷新失败',
+        icon: 'none'
+      });
+    } finally {
+      wx.hideLoading();
+    }
+  },
+  
+  // 格式化订单状态文本
+  getStatusText(status) {
+    const statusMap = {
+      pending: '待接单',
+      delivering: '配送中',
+      completed: '已完成'
+    };
+    return statusMap[status] || '未知状态';
+  },
+  
+  // 显示订单详情模态框
+  async showOrderDetails(e) {
+    const { status } = e.currentTarget.dataset;
+    let title = '订单详情';
+    let statusParam = status;
     
+    // 设置标题
+    switch(status) {
+      case 'all':
+        title = '总订单列表';
+        statusParam = '';
+        break;
+      case 'pending':
+        title = '待接单列表';
+        break;
+      case 'delivering':
+        title = '配送中列表';
+        break;
+      case 'completed':
+        title = '已完成列表';
+        break;
+    }
+    
+    // 显示加载状态
+    wx.showLoading({ title: '加载中...' });
+    
+    try {
+      // 获取对应状态的订单
+      const result = await getOrderList({
+        status: statusParam || undefined,
+        userType: 'receiver',
+        limit: 50 // 获取足够数量的订单显示在模态框中
+      });
+      
+      const orders = result.code === 200 && Array.isArray(result.data) ? result.data : [];
+      
+      // 格式化订单
+      const formattedOrders = orders.map(order => ({
+        ...order,
+        createdAt: order.createdAt ? formatDateTime(order.createdAt) : '暂无创建时间',
+        statusText: this.getStatusText(order.status)
+      }));
+      
+      // 更新数据并显示模态框
+      this.setData({
+        showModal: true,
+        modalTitle: title,
+        modalOrders: formattedOrders
+      });
+    } catch (err) {
+      console.error('获取订单详情失败:', err);
+      wx.showToast({
+        title: '加载订单失败',
+        icon: 'none'
+      });
+    } finally {
+      wx.hideLoading();
+    }
+  },
+  
+  // 关闭模态框
+  closeModal() {
+    this.setData({
+      showModal: false,
+      modalOrders: []
+    });
+  },
+
+
+  
+  // 接单处理函数
+  async handleAcceptOrder(e) {
     // 检查e对象是否存在
     if (!e) {
-      console.error('错误: 事件对象e不存在');
       wx.showToast({
         title: '系统错误，请刷新页面',
         icon: 'none'
@@ -281,22 +341,15 @@ Page({
       return;
     }
     
-    // 详细记录dataset内容
-    const currentTarget = e.currentTarget || e.target;
-    console.log('当前目标元素:', currentTarget);
-    
-    const dataset = currentTarget?.dataset || {};
-    console.log('点击元素的dataset内容:', JSON.stringify(dataset));
-    
     // 从多个可能的键中获取订单ID，增加获取成功的可能性
     let orderId = null;
+    const dataset = e.currentTarget?.dataset || {};
     
     // 尝试所有可能的键名
     const possibleKeys = ['orderId', 'orderid', 'id', '_id', 'order-id'];
     for (const key of possibleKeys) {
       if (dataset[key] && dataset[key] !== 'undefined' && dataset[key] !== null) {
         orderId = dataset[key];
-        console.log(`从键'${key}'获取到订单ID:`, orderId);
         break;
       }
     }
@@ -304,16 +357,9 @@ Page({
     // 直接从e.currentTarget.dataset.orderId获取（微信小程序会自动转换为驼峰命名）
     if (!orderId && e.currentTarget?.dataset?.orderId) {
       orderId = e.currentTarget.dataset.orderId;
-      console.log('通过驼峰命名orderId获取到订单ID:', orderId);
     }
     
-    // 额外检查整个e对象，寻找可能的ID信息
-    console.log('e对象完整信息:', JSON.stringify(e));
-    
-    console.log('最终获取到的订单ID:', orderId, '类型:', typeof orderId);
-    
     if (!orderId || orderId === 'undefined' || orderId === null || orderId === '') {
-      console.error('订单ID无效或未找到:', orderId);
       wx.showToast({
         title: '无法获取订单信息，请刷新页面',
         icon: 'none'
@@ -323,14 +369,10 @@ Page({
     
     try {
       // 调用API进行接单
-      console.log('调用acceptOrder API，订单ID:', orderId);
       const result = await acceptOrder(orderId);
       
-      console.log('接单API返回结果:', result);
-      
       if (result && result.code === 200) {
-        console.log('接单成功，准备更新UI');
-        // 显示更明确的成功提示
+        // 显示成功提示
         wx.showToast({ 
           title: '接单成功！',
           icon: 'success',
@@ -339,21 +381,16 @@ Page({
         
         // 短暂延迟后再重新加载，确保云函数有足够时间处理
         setTimeout(async () => {
-          console.log('延迟后重新加载订单列表');
-          // 首先保存当前活动的标签页
-          const currentTab = this.data.activeTab;
+          // 先加载统计数据，确保待接单数量正确更新
+          await this.loadOrderStats();
           
-          // 先加载待接单列表（接单后订单会从这个列表移除）
+          // 然后加载待接单列表（接单后订单会从这个列表移除）
           await this.loadOrders();
           
-          // 然后加载配送中列表（接单后订单会出现在这个列表）
+          // 再加载配送中列表（接单后订单会出现在这个列表）
+          const currentTab = this.data.activeTab;
           this.setData({ activeTab: 'delivering' }, async () => {
             await this.loadOrders();
-            console.log('配送中订单列表已重新加载，数量:', this.data.deliveringOrders.length);
-            // 如果有配送中订单，打印第一个订单的接单时间
-            if (this.data.deliveringOrders.length > 0) {
-              console.log('第一个配送中订单的接单时间:', this.data.deliveringOrders[0].acceptedAt);
-            }
             // 恢复到原始标签页
             this.setData({ activeTab: currentTab });
           });
@@ -362,51 +399,15 @@ Page({
         throw new Error(result?.message || '接单失败');
       }
     } catch (err) {
-        console.error('接单操作失败:', err);
-        wx.showToast({
-          title: err.message || '操作失败',
-          icon: 'none',
-          duration: 2000
-        });
-      }
-  },
-  
-  // 测试函数：直接使用指定订单ID进行接单
-  async testAcceptOrderDirectly() {
-    // 获取第一个待接订单的ID
-    if (this.data.pendingOrders && this.data.pendingOrders.length > 0) {
-      const testOrderId = this.data.pendingOrders[0]._id;
-      
-      try {
-        console.log('测试直接调用acceptOrder API，订单ID:', testOrderId);
-        const result = await acceptOrder(testOrderId);
-        
-        console.log('测试接单API返回结果:', result);
-        if (result && result.code === 200) {
-          wx.showToast({ title: '测试接单成功' });
-          // 重新加载订单列表
-          this.loadOrders();
-        } else {
-          console.error('测试接单失败:', result?.message);
-          wx.showToast({ 
-            title: result?.message || '测试接单失败', 
-            icon: 'none' 
-          });
-        }
-      } catch (err) {
-        console.error('测试接单异常:', err);
-        wx.showToast({ 
-          title: err.message || '测试失败', 
-          icon: 'none' 
-        });
-      }
-    } else {
-      wx.showToast({ 
-        title: '没有待接订单可测试', 
-        icon: 'none' 
+      wx.showToast({
+        title: err.message || '操作失败',
+        icon: 'none',
+        duration: 2000
       });
     }
   },
+  
+
   
   // 登出
   logout() {

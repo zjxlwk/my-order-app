@@ -129,12 +129,7 @@ export async function getOrderList(params = {}) {
   }
 }
 
-/**
- * getOrders函数 - 作为getOrderList的别名，保持API兼容性
- * @param {Object} params - 查询参数
- * @returns {Promise} - 订单列表
- */
-export const getOrders = getOrderList;
+
 
 /**
  * 创建订单

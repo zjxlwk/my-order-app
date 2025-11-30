@@ -184,47 +184,81 @@ exports.main = async (event, context) => {
             // 构建基础查询条件
             let baseQuery = {};
             
-            // 接单员只能看到自己接的订单统计，强制添加receiverId过滤
-            if (user.userType === 'receiver') {
-              baseQuery.receiverId = userId;
-              console.log('统计数据应用receiverId过滤:', baseQuery.receiverId);
-            }
-            console.log('统计数据基础查询条件:', baseQuery);
+            // 对于接单员：
+            // 1. 查询待接单时不添加receiverId过滤条件，因为待接单订单还没有分配
+            // 2. 查询配送中和已完成订单时，只显示自己接的订单
+            // 这里需要分别查询不同状态的订单以保持一致性
+            console.log('统计数据 - 用户名:', user.username, '用户类型:', user.userType);
+            console.log('统计数据基础查询条件（初始）:', baseQuery);
             
             // 优化统计查询：使用聚合查询减少数据库请求
             try {
-              // 使用聚合查询获取所有状态的订单数量
-              const aggregationResult = await db.collection('orders')
-                .where(baseQuery)
-                .aggregate()
-                .group({
-                  _id: '$status',
-                  count: _.sum(1)
-                })
-                .end();
-                
-              // 初始化统计结果
-              const stats = {
-                pending: 0,
-                delivering: 0,
-                completed: 0
-              };
+              // 分别查询不同状态的订单数量，保持与获取订单列表逻辑一致
+              let pendingCount = 0;
+              let deliveringCount = 0;
+              let completedCount = 0;
               
-              // 处理聚合结果
-              if (aggregationResult.list && aggregationResult.list.length > 0) {
-                aggregationResult.list.forEach(item => {
-                  if (item._id === 'pending') {
-                    stats.pending = item.count;
-                  } else if (item._id === 'accepted') {
-                    stats.delivering = item.count;
-                  } else if (item._id === 'completed') {
-                    stats.completed = item.count;
-                  }
-                });
+              // 对于接单员：
+              // 1. 查询待接单时不添加receiverId过滤条件
+              // 2. 查询配送中和已完成订单时，只显示自己接的订单
+              if (user.userType === 'receiver') {
+                console.log('接单员统计查询 - 待接单不需要receiverId过滤');
+                // 查询待接单（所有人都能看到）
+                const pendingResult = await db.collection('orders').where({ status: 'pending' }).count();
+                pendingCount = pendingResult.total;
+                
+                // 查询配送中（只看自己的）
+                const deliveringResult = await db.collection('orders').where({
+                  receiverId: userId,
+                  status: 'accepted'
+                }).count();
+                deliveringCount = deliveringResult.total;
+                
+                // 查询已完成（只看自己的）
+                const completedResult = await db.collection('orders').where({
+                  receiverId: userId,
+                  status: 'completed'
+                }).count();
+                completedCount = completedResult.total;
+              } else {
+                // 对于派单员或其他角色，使用聚合查询
+                console.log('非接单员使用聚合查询统计数据');
+                const aggregationResult = await db.collection('orders')
+                  .where(baseQuery)
+                  .aggregate()
+                  .group({
+                    _id: '$status',
+                    count: _.sum(1)
+                  })
+                  .end();
+                  
+                // 处理聚合结果
+                if (aggregationResult.list && aggregationResult.list.length > 0) {
+                  aggregationResult.list.forEach(item => {
+                    if (item._id === 'pending') {
+                      pendingCount = item.count;
+                    } else if (item._id === 'accepted') {
+                      deliveringCount = item.count;
+                    } else if (item._id === 'completed') {
+                      completedCount = item.count;
+                    }
+                  });
+                }
               }
               
-              // 计算总数
-              stats.total = stats.pending + stats.delivering + stats.completed;
+              // 初始化统计结果
+              const stats = {
+                pending: pendingCount,
+                delivering: deliveringCount,
+                completed: completedCount
+              };
+              
+              // 计算总数：接单员的总订单数只包含配送中和已完成，不包含待接单
+              stats.total = user.userType === 'receiver' ? 
+                stats.delivering + stats.completed : 
+                stats.pending + stats.delivering + stats.completed;
+              
+              console.log('接单员统计结果 - 待接单:', pendingCount, '配送中:', deliveringCount, '已完成:', completedCount, '总数:', user.userType === 'receiver' ? deliveringCount + completedCount : pendingCount + deliveringCount + completedCount);
               
               return {
                 code: 200,
@@ -235,21 +269,43 @@ exports.main = async (event, context) => {
               // 如果聚合查询失败（例如数据库版本不支持），回退到原始方法
               console.log('聚合查询失败，使用回退方法:', aggregationError);
               
-              // 并行查询以提高效率
-              const [pendingCount, acceptedCount, completedCount] = await Promise.all([
-                db.collection('orders').where({ ...baseQuery, status: 'pending' }).count(),
-                db.collection('orders').where({ ...baseQuery, status: 'accepted' }).count(),
-                db.collection('orders').where({ ...baseQuery, status: 'completed' }).count()
-              ]);
+              // 根据用户类型采用不同的查询策略
+              let pendingCount = 0;
+              let deliveringCount = 0;
+              let completedCount = 0;
+              
+              if (user.userType === 'receiver') {
+                console.log('接单员统计查询（回退方法）- 待接单不需要receiverId过滤');
+                // 接单员：分别查询不同状态的订单
+                const pendingResult = await db.collection('orders').where({ status: 'pending' }).count();
+                const deliveringResult = await db.collection('orders').where({ receiverId: userId, status: 'accepted' }).count();
+                const completedResult = await db.collection('orders').where({ receiverId: userId, status: 'completed' }).count();
+                
+                pendingCount = pendingResult.total;
+                deliveringCount = deliveringResult.total;
+                completedCount = completedResult.total;
+              } else {
+                // 非接单员：并行查询所有状态
+                console.log('非接单员统计查询（回退方法）');
+                const [pendingResult, acceptedResult, completedResult] = await Promise.all([
+                  db.collection('orders').where({ ...baseQuery, status: 'pending' }).count(),
+                  db.collection('orders').where({ ...baseQuery, status: 'accepted' }).count(),
+                  db.collection('orders').where({ ...baseQuery, status: 'completed' }).count()
+                ]);
+                
+                pendingCount = pendingResult.total;
+                deliveringCount = acceptedResult.total;
+                completedCount = completedResult.total;
+              }
               
               return {
                 code: 200,
                 message: '获取订单统计成功',
                 data: {
-                  pending: pendingCount.total,
-                  delivering: acceptedCount.total,
-                  completed: completedCount.total,
-                  total: pendingCount.total + acceptedCount.total + completedCount.total
+                  pending: pendingCount,
+                  delivering: deliveringCount,
+                  completed: completedCount,
+                  total: user.userType === 'receiver' ? deliveringCount + completedCount : pendingCount + deliveringCount + completedCount
                 }
               };
             }

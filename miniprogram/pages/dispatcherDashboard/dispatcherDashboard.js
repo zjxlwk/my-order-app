@@ -1,6 +1,6 @@
 // 派单员仪表盘页面
 const app = getApp();
-const { getOrderStats, getOrders, createOrder } = require('../../utils/apiService.js');
+const { getOrderStats, getOrderList, createOrder } = require('../../utils/apiService.js');
 const format = require('../../utils/format.js');
 
 Page({
@@ -25,7 +25,12 @@ Page({
       note: ''
     },
     refreshing: false,
-    showNewOrderForm: false
+    showNewOrderForm: false,
+    showModal: false,
+    modalTitle: '',
+    modalOrders: [],
+    // 当前登录用户信息
+    currentUser: ''
   },
 
   onShow() {
@@ -37,9 +42,22 @@ Page({
       return;
     }
     
+    // 获取并设置当前用户信息
+    this.setCurrentUserInfo();
+    
     // 加载统计数据和订单列表
     this.loadOrderStats();
     this.loadDispatchedOrders();
+  },
+  
+  // 设置当前登录用户信息
+  setCurrentUserInfo() {
+    const userInfo = app.getUserInfo();
+    if (userInfo) {
+      this.setData({
+        currentUser: userInfo.username || '用户'
+      });
+    }
   },
 
   // 加载订单统计数据
@@ -87,7 +105,7 @@ Page({
 
     try {
       // 使用封装的API获取派单员的订单列表（调用云函数）
-      const result = await getOrders({
+      const result = await getOrderList({
         userType: 'dispatcher',
         query: this.data.searchQuery
       });
@@ -258,6 +276,84 @@ Page({
           });
         }
       }
+    });
+  },
+
+  // 格式化订单状态文本
+  getStatusText(status) {
+    const statusMap = {
+      pending: '待接单',
+      delivering: '配送中',
+      completed: '已完成'
+    };
+    return statusMap[status] || '未知状态';
+  },
+  
+  // 显示订单详情模态框
+  async showOrderDetails(e) {
+    const { status } = e.currentTarget.dataset;
+    let title = '订单详情';
+    let statusParam = status;
+    
+    // 设置标题
+    switch(status) {
+      case 'all':
+        title = '总订单列表';
+        statusParam = '';
+        break;
+      case 'pending':
+        title = '待接单列表';
+        break;
+      case 'delivering':
+        title = '配送中列表';
+        break;
+      case 'completed':
+        title = '已完成列表';
+        break;
+    }
+    
+    // 显示加载状态
+    wx.showLoading({ title: '加载中...' });
+    
+    try {
+      // 获取对应状态的订单
+      const result = await getOrderList({
+        status: statusParam || undefined,
+        userType: 'dispatcher',
+        limit: 50 // 获取足够数量的订单显示在模态框中
+      });
+      
+      const orders = result.code === 200 && Array.isArray(result.data) ? result.data : [];
+      
+      // 格式化订单
+      const formattedOrders = orders.map(order => ({
+        ...order,
+        createdAt: format.formatDateTime(order.createdAt) || '暂无创建时间',
+        statusText: this.getStatusText(order.status)
+      }));
+      
+      // 更新数据并显示模态框
+      this.setData({
+        showModal: true,
+        modalTitle: title,
+        modalOrders: formattedOrders
+      });
+    } catch (err) {
+      console.error('获取订单详情失败:', err);
+      wx.showToast({
+        title: '加载订单失败',
+        icon: 'none'
+      });
+    } finally {
+      wx.hideLoading();
+    }
+  },
+  
+  // 关闭模态框
+  closeModal() {
+    this.setData({
+      showModal: false,
+      modalOrders: []
     });
   }
 });

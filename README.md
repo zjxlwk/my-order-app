@@ -48,11 +48,10 @@ ZL/
 │   ├── app.json          # 全局配置
 │   ├── app.wxss          # 全局样式
 │   ├── cloudfunctions/   # 云函数目录
+│   │   ├── initDatabase/ # 数据库初始化云函数
 │   │   ├── login/        # 登录云函数
 │   │   ├── orders/       # 订单处理云函数
 │   │   └── register/     # 注册云函数
-│   ├── components/       # 自定义组件
-│   ├── images/           # 图片资源
 │   ├── pages/            # 小程序页面
 │   │   ├── dispatcherDashboard/   # 派单员控制台
 │   │   ├── login/        # 登录页面
@@ -61,11 +60,18 @@ ZL/
 │   ├── project.config.json        # 项目配置
 │   ├── project.private.config.json # 私有配置
 │   └── utils/            # 工具函数
-│       ├── api.js        # API调用封装
-│       ├── request.js    # 请求封装
-│       └── storage.js    # 存储封装
+│       ├── apiService.js      # API调用封装
+│       ├── dbIndexConfig.js   # 数据库索引配置
+│       ├── errorHandler.js    # 错误处理
+│       ├── format.js          # 格式化工具
+│       ├── storage.js         # 存储封装
+│       ├── timeoutHandler.js  # 超时处理
+│       └── validator.js       # 数据验证
 ├── .gitignore            # Git忽略配置
 ├── README.md             # 项目说明文档
+├── test_guide.md         # 测试指南文档
+├── project.config.json   # 根目录项目配置
+├── project.private.config.json # 根目录私有配置
 └── package.json          # 项目基本配置
 ```
 
@@ -130,6 +136,11 @@ wx.cloud.init({
 4. 选择用户类型：接单员或派单员
 5. 点击"注册"按钮
 
+注册时需注意：
+- 用户名长度应在3-20个字符之间
+- 密码应包含字母和数字，长度不少于6位
+- 邮箱格式需要符合标准规范
+
 ### 2. 用户登录
 
 1. 在微信小程序中打开应用
@@ -145,9 +156,10 @@ wx.cloud.init({
 
 #### 创建新订单
 
-1. 在派单员仪表盘页面，填写订单内容
-2. 点击"创建订单"按钮
-3. 订单将显示在"已派订单"列表中，状态为"待接单"
+1. 在派单员仪表盘页面，填写订单号、配送地址、联系人、联系电话等必要信息
+2. 可选择填写备注信息
+3. 点击"创建订单"按钮
+4. 订单将显示在"已派订单"列表中，状态为"待接单"
 
 #### 查看已派订单
 
@@ -279,9 +291,10 @@ cd c:\Users\皇皇网店\Desktop\ZL
 #### 已完成工作
 
 1. **架构迁移**：成功将项目从Netlify+MySQL架构迁移到微信小程序云开发
-2. **代码清理**：删除了所有与Netlify和MySQL相关的冗余文件
-3. **云函数开发**：实现了核心功能的云函数（login、register、orders）
-4. **文档更新**：创建了适配微信云开发的综合文档
+2. **代码清理**：删除了所有冗余文件和未使用的函数，优化了代码结构
+3. **云函数开发**：实现了核心功能的云函数（login、register、orders、initDatabase）
+4. **工具模块完善**：开发了多个工具模块支持系统功能（apiService、errorHandler、validator等）
+5. **文档更新**：创建了适配微信云开发的综合文档和测试指南
 
 ### ✅ 技术验证完成项
 
@@ -356,7 +369,7 @@ cd c:\Users\皇皇网店\Desktop\ZL
 
 ### 🎯 下一步行动
 
-1. 在微信开发者工具中进行最终的功能测试
+1. 参考test_guide.md文档进行全面的功能测试
 2. 上传并部署所有云函数到云端
 3. 配置数据库集合和安全规则
 4. 提交小程序审核并发布

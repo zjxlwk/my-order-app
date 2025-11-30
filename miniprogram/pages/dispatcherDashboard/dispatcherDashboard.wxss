@@ -3,6 +3,45 @@
   background-color: #f8f8f8;
 }
 
+/* 头部样式 */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #07c160;
+  color: white;
+  padding: 30rpx 30rpx 30rpx 50rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.1);
+}
+
+.header-title {
+  font-size: 36rpx;
+  font-weight: bold;
+}
+
+.header-user {
+  display: flex;
+  align-items: center;
+  gap: 30rpx;
+}
+
+.header-username {
+  font-size: 28rpx;
+  color: white;
+  max-width: 200rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.header-logout {
+  font-size: 28rpx;
+  color: white;
+  padding: 10rpx 20rpx;
+  border: 2rpx solid white;
+  border-radius: 20rpx;
+}
+
 /* 统计卡片样式 */
 .stats-cards {
   display: flex;
@@ -223,26 +262,27 @@
   font-size: 28rpx;
 }
 
-/* 弹窗样式 */
+/* 模态框样式 */
 .modal {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
+  right: 0;
+  bottom: 0;
   background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 999;
+  z-index: 1000;
 }
 
 .modal-content {
-  width: 90%;
-  max-width: 600rpx;
   background-color: #fff;
-  border-radius: 20rpx;
-  overflow: hidden;
+  border-radius: 12rpx;
+  width: 85%;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
 }
 
 .modal-header {
@@ -250,7 +290,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 30rpx;
-  border-bottom: 1rpx solid #e0e0e0;
+  border-bottom: 1rpx solid #eee;
 }
 
 .modal-title {
@@ -260,13 +300,21 @@
 }
 
 .modal-close {
-  font-size: 50rpx;
+  font-size: 48rpx;
   color: #999;
   line-height: 1;
+  padding: 0;
+  margin: 0;
+}
+
+.modal-close:active {
+  color: #666;
 }
 
 .modal-body {
   padding: 30rpx;
+  overflow-y: auto;
+  flex: 1;
 }
 
 .modal-footer {
@@ -278,6 +326,42 @@
   flex: 1;
   margin: 0;
   border-radius: 0;
+}
+
+.modal-order-item {
+  padding: 30rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.modal-order-item:last-child {
+  border-bottom: none;
+}
+
+.modal-order-id {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 20rpx;
+}
+
+.modal-order-info {
+  font-size: 28rpx;
+  color: #666;
+  line-height: 1.8;
+}
+
+.modal-order-info view {
+  margin-bottom: 15rpx;
+}
+
+.modal-order-info view:last-child {
+  margin-bottom: 0;
+}
+
+.modal-order-time {
+  color: #999;
+  font-size: 26rpx;
+  margin-top: 10rpx;
 }
 
 /* 表单样式 */
@@ -294,11 +378,132 @@
 
 .input-group input,
 .input-group textarea {
-  width: 100%;
-  padding: 20rpx;
+  width: 95%;
+  margin: 0 auto;
+  padding: 24rpx 30rpx;
   border: 2rpx solid #e0e0e0;
   border-radius: 10rpx;
   font-size: 28rpx;
+  box-sizing: border-box;
+  letter-spacing: 0.5rpx;
+  /* 确保文本垂直居中且完全显示 */
+  height: 80rpx;
+  line-height: 32rpx;
+  vertical-align: middle;
+  /* 防止点击时滚动 */
+  overflow: hidden;
+  position: relative;
+  /* 禁止选择和长按操作 */
+  user-select: none;
+  -webkit-user-select: none;
+  /* 防止iOS上的缩放行为 */
+  -webkit-text-size-adjust: 100%;
+  /* 优化点击行为 */
+  -webkit-tap-highlight-color: transparent;
+  tap-highlight-color: transparent;
+  /* 固定文本位置，防止点击时位移 */
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  /* 确保文本位置稳定 */
+  writing-mode: horizontal-tb;
+  text-combine-horizontal: none;
+}
+
+/* 专门优化placeholder样式 */
+.input-group input::-webkit-input-placeholder,
+.input-group textarea::-webkit-input-placeholder {
+  /* 确保placeholder文本完全稳定 */
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  left: 30rpx;
+  right: 30rpx;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 26rpx;
+  color: #999;
+  line-height: 32rpx;
+  letter-spacing: 0rpx;
+  text-indent: 0;
+  /* 防止任何可能的变换 */
+  transform-origin: center;
+  transition: none !important;
+}
+
+.input-group input:-moz-placeholder,
+.input-group textarea:-moz-placeholder {
+  /* Firefox 4-18 兼容 */
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  left: 30rpx;
+  right: 30rpx;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 26rpx;
+  color: #999;
+  line-height: 32rpx;
+  letter-spacing: 0rpx;
+  text-indent: 0;
+}
+
+.input-group input::-moz-placeholder,
+.input-group textarea::-moz-placeholder {
+  /* Firefox 19+ 兼容 */
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  left: 30rpx;
+  right: 30rpx;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 26rpx;
+  color: #999;
+  line-height: 32rpx;
+  letter-spacing: 0rpx;
+  text-indent: 0;
+}
+
+.input-group input:-ms-input-placeholder,
+.input-group textarea:-ms-input-placeholder {
+  /* IE 10+ 兼容 */
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  left: 30rpx;
+  right: 30rpx;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 26rpx;
+  color: #999;
+  line-height: 32rpx;
+  letter-spacing: 0rpx;
+  text-indent: 0;
+}
+
+.input-group textarea {
+  height: 150rpx;
+  resize: none;
+  line-height: 1.5;
+}
+
+/* 确保placeholder文本完全可见 */
+.input-group input::placeholder,
+.input-group textarea::placeholder {
+  color: #999;
+  font-size: 26rpx;
+  letter-spacing: 0rpx;
+  text-indent: 0;
+  line-height: 30rpx;
+  vertical-align: middle;
 }
 
 .input-group textarea {

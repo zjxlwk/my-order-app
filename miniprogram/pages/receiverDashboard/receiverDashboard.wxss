@@ -3,9 +3,43 @@
   background-color: #f8f8f8;
 }
 
+/* 头部样式 */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #07c160;
+  color: white;
+  padding: 30rpx 30rpx 30rpx 50rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.1);
+}
+
+.header-title {
+  font-size: 36rpx;
+  font-weight: bold;
+}
+
+.header-user {
+  display: flex;
+  align-items: center;
+  gap: 30rpx;
+}
+
+.header-username {
+  font-size: 28rpx;
+  color: white;
+  max-width: 200rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .header-logout {
   font-size: 28rpx;
-  color: #07c160;
+  color: white;
+  padding: 10rpx 20rpx;
+  border: 2rpx solid white;
+  border-radius: 20rpx;
 }
 
 /* 错误提示 */
@@ -166,6 +200,97 @@
   padding: 30rpx;
   margin-bottom: 20rpx;
   box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+/* 模态框样式 */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: #fff;
+  border-radius: 12rpx;
+  width: 85%;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 30rpx;
+  border-bottom: 1rpx solid #eee;
+}
+
+.modal-title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.modal-close {
+  font-size: 48rpx;
+  color: #999;
+  line-height: 1;
+  padding: 0;
+  margin: 0;
+}
+
+.modal-close:active {
+  color: #666;
+}
+
+.modal-body {
+  padding: 30rpx;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.modal-order-item {
+  padding: 30rpx 0;
+  border-bottom: 1px solid #eee;
+}
+
+.modal-order-item:last-child {
+  border-bottom: none;
+}
+
+.modal-order-id {
+  font-weight: bold;
+  margin-bottom: 20rpx;
+  font-size: 32rpx;
+  color: #333;
+}
+
+.modal-order-info {
+  font-size: 28rpx;
+  color: #666;
+  line-height: 1.8;
+}
+
+.modal-order-info > view {
+  margin-bottom: 15rpx;
+}
+
+.modal-order-info > view:last-child {
+  margin-bottom: 0;
+}
+
+.modal-order-time {
+  color: #999;
+  font-size: 26rpx;
+  margin-top: 10rpx;
 }
 
 .order-status-badge {
