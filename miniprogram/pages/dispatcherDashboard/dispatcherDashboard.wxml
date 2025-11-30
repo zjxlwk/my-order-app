@@ -1,0 +1,167 @@
+<!-- 派单员仪表盘页面 -->
+<view class="container">
+  <!-- 头部信息 -->
+  <view class="header">
+    <view class="header-title">派单员工作台</view>
+    <view class="header-user">
+      <text bindtap="logout" class="header-logout">退出</text>
+    </view>
+  </view>
+
+  <!-- 错误提示 -->
+  <view class="error-message" wx:if="{{error}}">{{error}}</view>
+
+  <!-- 订单统计卡片 -->
+  <view class="stats-cards">
+    <view class="stat-card total">
+      <view class="stat-value">{{orderStats.total}}</view>
+      <view class="stat-label">总订单数</view>
+    </view>
+    <view class="stat-card pending">
+      <view class="stat-value">{{orderStats.pending}}</view>
+      <view class="stat-label">待接单</view>
+    </view>
+    <view class="stat-card delivering">
+      <view class="stat-value">{{orderStats.delivering}}</view>
+      <view class="stat-label">配送中</view>
+    </view>
+    <view class="stat-card completed">
+      <view class="stat-value">{{orderStats.completed}}</view>
+      <view class="stat-label">已完成</view>
+    </view>
+  </view>
+
+  <!-- 功能按钮区 -->
+  <view class="action-buttons">
+    <button 
+      class="btn-primary full-width"
+      bindtap="showNewOrderForm"
+    >创建新订单</button>
+  </view>
+
+  <!-- 搜索区域 -->
+  <view class="search-section">
+    <view class="section-title">已派订单列表</view>
+    <view class="search-form">
+      <input 
+        type="text" 
+        placeholder="搜索订单号或配送地址"
+        value="{{searchQuery}}"
+        bindinput="onSearchInput"
+      />
+      <button 
+        type="primary" 
+        size="mini" 
+        bindtap="searchOrders"
+      >搜索</button>
+    </view>
+  </view>
+
+  <!-- 加载状态 -->
+  <view class="loading" wx:if="{{loading}}">
+    <text>加载中...</text>
+  </view>
+
+  <!-- 订单列表 -->
+  <view class="order-list" wx:if="{{!loading}}">
+    <view class="empty" wx:if="{{dispatchedOrders.length === 0}}">暂无订单数据</view>
+    <view class="order-card" wx:for="{{dispatchedOrders}}" wx:key="id">
+      <view class="order-status-badge {{item.statusText === '待接单' ? 'status-pending' : (item.statusText === '配送中' ? 'status-delivering' : 'status-completed')}}">{{item.statusText || '待接单'}}</view>
+      <view class="order-header">
+        <view class="order-id">订单号: {{item.orderId || item.id || '未知订单号'}}</view>
+      </view>
+      <view class="order-content">
+        <view class="order-item">配送地址: {{item.deliveryAddress}}</view>
+        <view class="order-item">联系人: {{item.contactPerson}}</view>
+        <view class="order-item">联系电话: {{item.contactPhone}}</view>
+        <view class="order-item" wx:if="{{item.dispatcherName}}">
+          派单员: {{item.dispatcherName}}
+        </view>
+        <view class="order-item" wx:if="{{item.receiverName}}">
+          接单员: {{item.receiverName}}
+        </view>
+        <view class="order-item" wx:if="{{item.note}}">
+          备注: {{item.note}}
+        </view>
+      </view>
+      <view class="order-footer">
+        <view class="order-time">创建时间: {{item.createdAt}}</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 新建订单表单弹窗 -->
+  <view class="modal" wx:if="{{showNewOrderForm}}">
+    <view class="modal-content">
+      <view class="modal-header">
+        <view class="modal-title">创建新订单</view>
+        <view class="modal-close" bindtap="closeNewOrderForm">×</view>
+      </view>
+      <view class="modal-body">
+        <view class="input-group">
+          <view class="label">订单号 *</view>
+          <input 
+            type="text" 
+            placeholder="请输入订单号"
+            value="{{newOrderForm.orderId}}"
+            data-field="orderId"
+            bindinput="onFormInputChange"
+          />
+        </view>
+        <view class="input-group">
+          <view class="label">配送地址 *</view>
+          <input 
+            type="text" 
+            placeholder="请输入配送地址"
+            value="{{newOrderForm.deliveryAddress}}"
+            data-field="deliveryAddress"
+            bindinput="onFormInputChange"
+          />
+        </view>
+        <view class="input-group">
+          <view class="label">联系人 *</view>
+          <input 
+            type="text" 
+            placeholder="请输入联系人姓名"
+            value="{{newOrderForm.contactPerson}}"
+            data-field="contactPerson"
+            bindinput="onFormInputChange"
+          />
+        </view>
+        <view class="input-group">
+          <view class="label">联系电话 *</view>
+          <input 
+            type="number" 
+            placeholder="请输入联系电话"
+            value="{{newOrderForm.contactPhone}}"
+            data-field="contactPhone"
+            bindinput="onFormInputChange"
+          />
+        </view>
+        <view class="input-group">
+          <view class="label">备注 (选填)</view>
+          <textarea 
+            placeholder="请输入备注信息"
+            value="{{newOrderForm.note}}"
+            data-field="note"
+            bindinput="onFormInputChange"
+            maxlength="200"
+          />
+        </view>
+      </view>
+      <view class="modal-footer">
+        <button 
+          class="btn-default" 
+          bindtap="closeNewOrderForm"
+          disabled="{{creatingOrder}}"
+        >取消</button>
+        <button 
+          class="btn-primary" 
+          bindtap="createNewOrder"
+          loading="{{creatingOrder}}"
+          disabled="{{creatingOrder}}"
+        >创建订单</button>
+      </view>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,257 @@
+.container {
+  min-height: 100vh;
+  background-color: #f8f8f8;
+}
+
+.header-logout {
+  font-size: 28rpx;
+  color: #07c160;
+}
+
+/* 错误提示 */
+.error-message {
+  margin: 20rpx;
+  padding: 20rpx;
+  background-color: #fff1f0;
+  border-radius: 10rpx;
+  color: #e64340;
+  font-size: 28rpx;
+  text-align: center;
+}
+
+/* 统计卡片样式 */
+.stats-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20rpx;
+  padding: 20rpx;
+}
+
+.stat-card {
+  flex: 1;
+  min-width: calc(50% - 10rpx);
+  background-color: #fff;
+  padding: 30rpx;
+  border-radius: 20rpx;
+  text-align: center;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+.stat-value {
+  font-size: 48rpx;
+  font-weight: bold;
+  margin-bottom: 10rpx;
+}
+
+.stat-label {
+  font-size: 28rpx;
+  color: #666;
+}
+
+.stat-card.total .stat-value {
+  color: #07c160;
+}
+
+.stat-card.pending .stat-value {
+  color: #ff9500;
+}
+
+.stat-card.delivering .stat-value {
+  color: #1e88e5;
+}
+
+.stat-card.completed .stat-value {
+  color: #07c160;
+}
+
+/* 搜索区域 */
+.search-section {
+  padding: 20rpx;
+  background-color: #fff;
+  margin-bottom: 20rpx;
+}
+
+.search-form {
+  display: flex;
+  align-items: center;
+}
+
+.search-form input {
+  flex: 1;
+  height: 80rpx;
+  padding: 0 30rpx;
+  border: 2rpx solid #e0e0e0;
+  border-radius: 40rpx;
+  margin-right: 20rpx;
+  font-size: 28rpx;
+}
+
+.search-form button {
+  width: 140rpx;
+  height: 80rpx;
+  line-height: 80rpx;
+  border-radius: 40rpx;
+  font-size: 28rpx;
+}
+
+/* 标签栏 */
+.tab-bar {
+  display: flex;
+  background-color: #fff;
+  margin-bottom: 20rpx;
+}
+
+.tab-item {
+  flex: 1;
+  padding: 30rpx 0;
+  text-align: center;
+  font-size: 32rpx;
+  color: #666;
+  position: relative;
+}
+
+.tab-item.active {
+  color: #07c160;
+}
+
+.tab-item.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40rpx;
+  height: 6rpx;
+  background-color: #07c160;
+  border-radius: 3rpx;
+}
+
+/* 加载状态 */
+.loading {
+  padding: 80rpx 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #999;
+}
+
+.loading image {
+  width: 100rpx;
+  height: 100rpx;
+  margin-bottom: 20rpx;
+  animation: rotate 1s linear infinite;
+}
+
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* 空状态 */
+.empty {
+  padding: 100rpx 0;
+  text-align: center;
+  color: #999;
+  font-size: 32rpx;
+}
+
+/* 订单列表 */
+.order-list {
+  padding: 0 20rpx 20rpx;
+}
+
+.order-card {
+  background-color: #fff;
+  border-radius: 20rpx;
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+.order-status-badge {
+  font-size: 26rpx;
+  padding: 8rpx 24rpx;
+  border-radius: 20rpx;
+  font-weight: 500;
+  box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.1);
+  min-width: 120rpx;
+  text-align: center;
+  white-space: nowrap;
+  display: inline-block;
+  margin-bottom: 15rpx;
+}
+
+.order-status-badge.status-pending {
+  background-color: #fff7e6;
+  color: #ff9500;
+  border: 1rpx solid #ffd699;
+}
+
+.order-status-badge.status-delivering {
+  background-color: #e3f2fd;
+  color: #1e88e5;
+  border: 1rpx solid #90caf9;
+}
+
+.order-status-badge.status-completed {
+  background-color: #f6ffed;
+  color: #07c160;
+  border: 1rpx solid #b7eb8f;
+}
+
+.order-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20rpx;
+  width: 100%;
+}
+
+.order-id {
+  font-size: 30rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+
+
+.order-content {
+  margin-bottom: 20rpx;
+}
+
+.order-item {
+  font-size: 28rpx;
+  color: #666;
+  margin-bottom: 10rpx;
+}
+
+.order-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 26rpx;
+  color: #999;
+}
+
+.order-time {
+  flex: 1;
+}
+
+.btn-accept,
+.btn-complete {
+  font-size: 26rpx;
+  padding: 0 30rpx;
+  height: 70rpx;
+  line-height: 70rpx;
+}
+
+.btn-accept {
+  color: #07c160;
+  border: 2rpx solid #07c160;
+  background-color: transparent;
+}
+
+.btn-complete {
+  color: #fff;
+  background-color: #07c160;
+  border: none;
+}

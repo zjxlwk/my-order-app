@@ -1,0 +1,97 @@
+<view class="container">
+  <view class="title">用户注册</view>
+  
+  <!-- 错误提示 -->
+  <view class="error-message" wx:if="{{error}}">{{error}}</view>
+  
+  <!-- 成功提示 -->
+  <view class="success-message" wx:if="{{success}}">{{success}}</view>
+  
+  <!-- 用户名输入 -->
+  <view class="input-group">
+    <view class="label">用户名</view>
+    <input 
+      type="text" 
+      placeholder="请输入用户名"
+      value="{{username}}"
+      data-field="username"
+      bindinput="onInputChange"
+    />
+  </view>
+  
+  <!-- 密码输入 -->
+  <view class="input-group">
+    <view class="label">密码</view>
+    <input 
+      type="password" 
+      placeholder="请输入密码(至少6位)"
+      value="{{password}}"
+      data-field="password"
+      bindinput="onInputChange"
+      password
+    />
+  </view>
+  
+  <!-- 确认密码输入 -->
+  <view class="input-group">
+    <view class="label">确认密码</view>
+    <input 
+      type="password" 
+      placeholder="请再次输入密码"
+      value="{{confirmPassword}}"
+      data-field="confirmPassword"
+      bindinput="onInputChange"
+      password
+    />
+  </view>
+  
+  <!-- 用户类型选择 -->
+  <view class="input-group">
+    <view class="label">用户类型</view>
+    <view class="user-type-selector">
+      <view 
+        class="user-type-item {{userType === 'receiver' ? 'active' : ''}}"
+        data-type="receiver"
+        bindtap="selectUserType"
+      >
+        接单员
+      </view>
+      <view 
+        class="user-type-item {{userType === 'dispatcher' ? 'active' : ''}}"
+        data-type="dispatcher"
+        bindtap="selectUserType"
+      >
+        派单员
+      </view>
+    </view>
+  </view>
+  
+  <!-- 派单员口令输入（仅派单员注册时显示） -->
+  <view class="input-group" wx:if="{{userType === 'dispatcher'}}">
+    <view class="label">派单员口令</view>
+    <input 
+      type="text" 
+      placeholder="请输入派单员注册口令" 
+      value="{{dispatcherCode}}"
+      data-field="dispatcherCode"
+      bindinput="onInputChange"
+    />
+    <view class="helper-text">派单员注册需验证身份，请联系管理员获取注册口令</view>
+  </view>
+  
+  <!-- 注册按钮 -->
+  <button 
+    class="btn btn-primary"
+    bindtap="register"
+    loading="{{loading}}"
+    disabled="{{loading}}"
+  >
+    {{loading ? '注册中...' : '注册'}}
+  </button>
+  <button 
+    class="btn btn-default"
+    bindtap="goToLogin"
+  >
+    返回登录
+  </button>
+</view>

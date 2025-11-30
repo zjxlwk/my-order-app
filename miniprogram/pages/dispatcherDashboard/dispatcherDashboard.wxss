@@ -1,0 +1,314 @@
+.container {
+  min-height: 100vh;
+  background-color: #f8f8f8;
+}
+
+/* 统计卡片样式 */
+.stats-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20rpx;
+  padding: 20rpx;
+}
+
+.stat-card {
+  flex: 1;
+  min-width: calc(50% - 10rpx);
+  background-color: #fff;
+  padding: 30rpx;
+  border-radius: 20rpx;
+  text-align: center;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+.stat-value {
+  font-size: 48rpx;
+  font-weight: bold;
+  margin-bottom: 10rpx;
+}
+
+.stat-label {
+  font-size: 28rpx;
+  color: #666;
+}
+
+.stat-card.total .stat-value {
+  color: #07c160;
+}
+
+.stat-card.pending .stat-value {
+  color: #ff9500;
+}
+
+.stat-card.delivering .stat-value {
+  color: #1e88e5;
+}
+
+.stat-card.completed .stat-value {
+  color: #07c160;
+}
+
+/* 功能按钮区样式 */
+.action-buttons {
+  padding: 0 20rpx 20rpx;
+}
+
+.full-width {
+  width: 100%;
+  margin-bottom: 20rpx;
+}
+
+.btn-primary {
+  background-color: #07c160;
+  color: white;
+}
+
+.btn-primary:active {
+  background-color: #06b555;
+}
+
+.btn-default {
+  background-color: #fff;
+  color: #666;
+  border: 1rpx solid #e0e0e0;
+}
+
+.btn-default:active {
+  background-color: #f5f5f5;
+}
+
+/* 搜索区域样式 */
+.search-section {
+  background-color: #fff;
+  padding: 20rpx;
+  margin-bottom: 20rpx;
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  margin-bottom: 20rpx;
+  color: #333;
+}
+
+.search-form {
+  display: flex;
+  align-items: center;
+}
+
+.search-form input {
+  flex: 1;
+  height: 72rpx;
+  padding: 0 30rpx;
+  border: 2rpx solid #e0e0e0;
+  border-radius: 36rpx;
+  font-size: 28rpx;
+  margin-right: 20rpx;
+}
+
+.search-form button {
+  height: 72rpx;
+  line-height: 72rpx;
+  font-size: 28rpx;
+  padding: 0 30rpx;
+}
+
+/* 订单列表样式 */
+.order-list {
+  padding: 0 20rpx;
+}
+
+.order-card {
+  background-color: #fff;
+  border-radius: 20rpx;
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+.order-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20rpx;
+  width: 100%;
+}
+
+.order-id {
+  font-size: 30rpx;
+  font-weight: bold;
+  color: #333;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-right: 15rpx;
+}
+
+.order-status-badge {
+  font-size: 26rpx;
+  padding: 8rpx 24rpx;
+  border-radius: 20rpx;
+  font-weight: 500;
+  box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.1);
+  min-width: 120rpx;
+  text-align: center;
+  white-space: nowrap;
+  display: inline-block;
+  margin-bottom: 15rpx;
+}
+
+.order-status-badge.status-pending {
+  background-color: #fff7e6;
+  color: #ff9500;
+  border: 1rpx solid #ffd699;
+}
+
+.order-status-badge.status-delivering {
+  background-color: #e3f2fd;
+  color: #1e88e5;
+  border: 1rpx solid #90caf9;
+}
+
+.order-status-badge.status-completed {
+  background-color: #f6ffed;
+  color: #07c160;
+  border: 1rpx solid #b7eb8f;
+}
+
+.order-content {
+  margin-bottom: 20rpx;
+}
+
+.order-item {
+  font-size: 28rpx;
+  color: #666;
+  margin-bottom: 10rpx;
+  line-height: 1.5;
+}
+
+.order-footer {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.order-time {
+  font-size: 26rpx;
+  color: #999;
+}
+
+/* 空状态样式 */
+.empty {
+  text-align: center;
+  padding: 100rpx 0;
+  color: #999;
+  font-size: 32rpx;
+}
+
+/* 加载状态样式 */
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 80rpx 0;
+}
+
+.loading image {
+  width: 80rpx;
+  height: 80rpx;
+  margin-bottom: 20rpx;
+}
+
+.loading text {
+  color: #666;
+  font-size: 28rpx;
+}
+
+/* 弹窗样式 */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.modal-content {
+  width: 90%;
+  max-width: 600rpx;
+  background-color: #fff;
+  border-radius: 20rpx;
+  overflow: hidden;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 30rpx;
+  border-bottom: 1rpx solid #e0e0e0;
+}
+
+.modal-title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.modal-close {
+  font-size: 50rpx;
+  color: #999;
+  line-height: 1;
+}
+
+.modal-body {
+  padding: 30rpx;
+}
+
+.modal-footer {
+  display: flex;
+  border-top: 1rpx solid #e0e0e0;
+}
+
+.modal-footer button {
+  flex: 1;
+  margin: 0;
+  border-radius: 0;
+}
+
+/* 表单样式 */
+.input-group {
+  margin-bottom: 30rpx;
+}
+
+.label {
+  font-size: 28rpx;
+  color: #666;
+  margin-bottom: 10rpx;
+  display: block;
+}
+
+.input-group input,
+.input-group textarea {
+  width: 100%;
+  padding: 20rpx;
+  border: 2rpx solid #e0e0e0;
+  border-radius: 10rpx;
+  font-size: 28rpx;
+}
+
+.input-group textarea {
+  height: 150rpx;
+  resize: none;
+}
+
+/* 响应式调整 */
+@media screen and (max-width: 375px) {
+  .stat-card {
+    min-width: 100%;
+  }
+}

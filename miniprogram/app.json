@@ -1,0 +1,25 @@
+{
+  "pages": [
+    "pages/login/login",
+    "pages/register/register",
+    "pages/receiverDashboard/receiverDashboard",
+    "pages/dispatcherDashboard/dispatcherDashboard"
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#07c160",
+    "navigationBarTitleText": "订单管理系统",
+    "navigationBarTextStyle": "white"
+  },
+  "usingComponents": {},
+  "lazyCodeLoading": "requiredComponents",
+  "sitemapLocation": "sitemap.json",
+  "permission": {
+    "scope.userLocation": {
+      "desc": "您的位置信息将用于订单配送"
+    }
+  },
+  "requiredPrivateInfos": [
+    "getLocation"
+  ]
+}

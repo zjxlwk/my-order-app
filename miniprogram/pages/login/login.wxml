@@ -1,0 +1,48 @@
+<view class="container">
+  <view class="logo-text">订单管理系统</view>
+  
+  <view class="login-form">
+    <view class="title">欢迎登录</view>
+    
+    <!-- 错误提示 -->
+    <view class="error-message" wx:if="{{error}}">{{error}}</view>
+    
+    <!-- 用户名输入 -->
+    <view class="input-group">
+      <input 
+        type="text" 
+        placeholder="请输入用户名"
+        value="{{username}}"
+        data-field="username"
+        bindinput="onInputChange"
+      />
+    </view>
+    
+    <!-- 密码输入 -->
+    <view class="input-group">
+      <input 
+        type="password" 
+        placeholder="请输入密码"
+        value="{{password}}"
+        data-field="password"
+        bindinput="onInputChange"
+        password
+      />
+    </view>
+    
+    <!-- 登录按钮 -->
+    <button 
+      class="btn btn-primary"
+      bindtap="login"
+      loading="{{loading}}"
+      disabled="{{loading}}"
+    >
+      {{loading ? '登录中...' : '登录'}}
+    </button>
+    
+    <!-- 注册链接 -->
+    <view class="register-link">
+      还没有账号？<text class="link" bindtap="goToRegister">立即注册</text>
+    </view>
+  </view>
+</view>
